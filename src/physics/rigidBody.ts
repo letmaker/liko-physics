@@ -1,8 +1,6 @@
 import type { Fixture } from "planck";
-import { getCategoryBit, getCategoryMask, inBoundaryArea, pl, to2DPos, toPhy, toPhyPos, world } from "./physics";
-import { IPoint, ScriptBase, Point, RegScript, IRigidBody, IShape, RigidType } from "liko";
-
-
+import { pl, physics, to2DPos, toPhy, toPhyPos } from "./physics";
+import { type IPoint, ScriptBase, Point, RegScript, type IRigidBody, type IShape, type RigidType } from "liko";
 
 export interface IRigidBodyData {
   /** 物理类型，static：静止不动类型，kinematic：运动类型（没有重力），dynamic：动态类型，支持重力，如果两个物品要想相互碰撞，则其中一个物体的类型必须是 dynamic */
@@ -39,7 +37,7 @@ export interface IRigidBodyData {
  */
 @RegScript("RigidBody")
 export class RigidBody extends ScriptBase implements IRigidBody {
-  private _body = world.createBody({ active: false, type: "kinematic", fixedRotation: true });
+  private _body = physics.world.createBody({ active: false, type: "kinematic", fixedRotation: true });
 
   /** 物理类型，static：静止不动类型，kinematic：运动类型（没有重力），dynamic：动态类型，支持重力，如果两个物品要想相互碰撞，则其中一个物体的类型必须是 dynamic */
   rigidType: RigidType = "static";
@@ -176,7 +174,7 @@ export class RigidBody extends ScriptBase implements IRigidBody {
     let pos2D = to2DPos(pos);
 
     // 检测是否在全局边界内，不在则销毁 target
-    if (!inBoundaryArea(pos2D)) {
+    if (!physics.inBoundaryArea(pos2D)) {
       this.target.destroy();
       return;
     }
@@ -195,7 +193,7 @@ export class RigidBody extends ScriptBase implements IRigidBody {
     this._body.setActive(false);
   }
   onDestroy(): void {
-    world.destroyBody(this._body);
+    physics.world.destroyBody(this._body);
   }
 
   /** 添加刚体形状 */
@@ -209,8 +207,8 @@ export class RigidBody extends ScriptBase implements IRigidBody {
       density: 1,
       isSensor: this.isSensor,
       filterGroupIndex: 0,
-      filterCategoryBits: getCategoryBit(this.category),
-      filterMaskBits: getCategoryMask(this.categoryAccepted),
+      filterCategoryBits: physics.getCategoryBit(this.category),
+      filterMaskBits: physics.getCategoryMask(this.categoryAccepted),
       ...shape,
     };
     const target = this.target;
